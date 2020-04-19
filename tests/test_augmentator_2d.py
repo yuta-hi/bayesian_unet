@@ -1,5 +1,6 @@
 import numpy as np
 from chainer_bcnn.data.augmentor import DataAugmentor, Crop2D, Flip2D, Affine2D, ResizeCrop2D
+from chainer_bcnn.data.augmentor import GaussNoise2D, SpeckleNoise2D, SaltNoise2D, PepperNoise2D, PoissonNoise2D
 
 import cv2
 import time
@@ -19,6 +20,12 @@ def main():
                            fill_mode=('nearest', 'constant'),
                            cval=(0., 0.),
                            interp_order=(3, 0)))
+    # augmentor.add(GaussNoise2D(mean=0, std=0.1))
+    augmentor.add(SpeckleNoise2D(mean=0, std=0.1))
+    # augmentor.add(PoissonNoise2D(255.))
+    # augmentor.add(SaltNoise2D(0.05))
+    # augmentor.add(PepperNoise2D(0.05))
+
 
     augmentor.summary('augment.json')
 

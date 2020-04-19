@@ -168,6 +168,11 @@ from .image import Flip as Flip2D  # NOQA
 from .image import Crop as Crop2D  # NOQA
 from .image import ResizeCrop as ResizeCrop2D  # NOQA
 from .image import Affine as Affine2D  # NOQA
+from .image import GaussNoise as GaussNoise2D  # NOQA
+from .image import SpeckleNoise as SpeckleNoise2D  # NOQA
+from .image import SaltNoise as SaltNoise2D  # NOQA
+from .image import PepperNoise as PepperNoise2D  # NOQA
+from .image import PoissonNoise as PoissonNoise2D  # NOQA
 
 from .volume import Flip as Flip3D  # NOQA
 from .volume import Crop as Crop3D  # NOQA

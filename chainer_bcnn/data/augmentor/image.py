@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import numpy as np
 import scipy.ndimage as ndi
 import cv2
+from functools import partial
 
 from . import Operation
 
@@ -343,3 +344,152 @@ class Affine(Operation):
                         fill_mode[1], cval[1], interp_order[1]) for y_i in y]
 
         return x, y
+
+
+def clip(func):
+    def warp(x, *args, **kwargs):
+        clim = (np.min(x), np.max(x))
+        x = func(x, *args, **kwargs)
+        return np.clip(x, *clim)
+    return warp
+
+@clip
+def gauss_noise(x, mean, std):
+    return x + np.random.normal(mean, std, x.shape)
+
+@clip
+def speckle_noise(x, mean, std):
+    return x + x * np.random.normal(mean, std, x.shape)
+
+@clip
+def salt_noise(x, ratio, cval=None):
+    if cval is None:
+        cval = np.max(x)
+
+    n_sample = int(np.ceil(x.size * ratio))
+    indices = [np.random.randint(0, s, n_sample) \
+                    for s in x.shape]
+    x[tuple(indices)] = cval
+
+    return x
+
+@clip
+def pepper_noise(x, ratio, cval=None):
+    if cval is None:
+        cval = np.min(x)
+
+    n_sample = int(np.ceil(x.size * ratio))
+    indices = [np.random.randint(0, s, n_sample) \
+                    for s in x.shape]
+    x[tuple(indices)] = cval
+
+    return x
+
+@clip
+def poisson_noise(x, mean):
+
+    min_val = np.min(x)
+    x -= min_val
+    max_val = np.max(x)
+    x /= max_val
+
+    x = np.random.poisson(x * mean) / float(mean)
+
+    x *= max_val
+    x += min_val
+
+    return x
+
+
+class GaussNoise(Operation):
+    """ Apply Gaussian noise to given images
+
+    Args:
+        mean (float): Mean of Gaussian distribution
+        std  (float): Standard deviation of it
+        keep_y (bool): If True, add noise only to input `x`. Defaults to True.
+    """
+    def __init__(self, mean, std, keep_y=True):
+        self._args = locals()
+        self._mean = mean
+        self._std = std
+        self._keep_y = keep_y
+        self._func = partial(gauss_noise, mean=mean, std=std)
+        self._ndim = 2
+
+    @property
+    def ndim(self):
+        return self._ndim
+
+    def apply_core(self, x, y):
+
+        if x is not None:
+            x = [self._func(x_i) for x_i in x]
+
+        if not self._keep_y:
+            if y is not None:
+                y = [self._func(y_i) for y_i in y]
+
+        return x, y
+
+class SpeckleNoise(GaussNoise):
+    """ Apply Speckle noise to given images
+
+    Args:
+        mean (float): Mean of Gaussian distribution
+        std  (float): Standard deviation of it
+        keep_y (bool): If True, add noise only to input `x`. Defaults to True.
+    """
+    def __init__(self, mean, std, keep_y=True):
+        self._args = locals()
+        self._mean = mean
+        self._std = std
+        self._keep_y = keep_y
+        self._func = partial(speckle_noise, mean=mean, std=std)
+        self._ndim = 2
+
+class SaltNoise(GaussNoise):
+    """ Apply Salt noise to given images
+
+    Args:
+        ratio (float): Ratio of the noise
+        cval  (float): If None, this value is set to the maximum value of the input.
+        keep_y (bool): If True, add noise only to input `x`. Defaults to True.
+    """
+    def __init__(self, ratio, cval=None, keep_y=True):
+        self._args = locals()
+        self._ratio = ratio
+        self._cval = cval
+        self._keep_y = keep_y
+        self._func = partial(salt_noise, ratio=ratio, cval=cval)
+        self._ndim = 2
+
+class PepperNoise(GaussNoise):
+    """ Apply Pepper noise to given images
+
+    Args:
+        ratio (float): Ratio of the noise
+        cval  (float): If None, this value is set to the maximum value of the input.
+        keep_y (bool): If True, add noise only to input `x`. Defaults to True.
+    """
+    def __init__(self, ratio, cval=None, keep_y=True):
+        self._args = locals()
+        self._ratio = ratio
+        self._cval = cval
+        self._keep_y = keep_y
+        self._func = partial(pepper_noise, ratio=ratio, cval=cval)
+        self._ndim = 2
+
+class PoissonNoise(GaussNoise):
+    """ Apply Poisson noise to given images
+
+    Args:
+        mean (float): Mean of Poisson distribution
+        keep_y (bool): If True, add noise only to input `x`. Defaults to True.
+    """
+    def __init__(self, mean, keep_y=True):
+        self._args = locals()
+        self._mean = mean
+        self._keep_y = keep_y
+        self._func = partial(poisson_noise, mean=mean)
+        self._ndim = 2
