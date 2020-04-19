@@ -178,3 +178,8 @@ from .volume import Flip as Flip3D  # NOQA
 from .volume import Crop as Crop3D  # NOQA
 from .volume import ResizeCrop as ResizeCrop3D  # NOQA
 from .volume import Affine as Affine3D  # NOQA
+from .volume import GaussNoise as GaussNoise3D  # NOQA
+from .volume import SpeckleNoise as SpeckleNoise3D  # NOQA
+from .volume import SaltNoise as SaltNoise3D  # NOQA
+from .volume import PepperNoise as PepperNoise3D  # NOQA
+from .volume import PoissonNoise as PoissonNoise3D  # NOQA

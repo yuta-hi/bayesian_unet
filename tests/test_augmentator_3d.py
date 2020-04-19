@@ -1,5 +1,6 @@
 import numpy as np
 from chainer_bcnn.data.augmentor import DataAugmentor, Crop3D, Flip3D, Affine3D
+from chainer_bcnn.data.augmentor import GaussNoise3D, SpeckleNoise3D, SaltNoise3D, PepperNoise3D, PoissonNoise3D
 from chainer_bcnn.data import load_image, save_image
 import time
 import argparse

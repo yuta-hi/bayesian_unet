@@ -5,12 +5,14 @@ import scipy.ndimage as ndi
 import warnings
 
 from . import Operation
+from . import image
 
 _row_axis = 1
 _col_axis = 2
 _depth_axis = 3
 _channel_axis = 0
 
+assert image._channel_axis == _channel_axis
 
 def flip(x, axis):
     if x is None:
@@ -409,3 +411,63 @@ class Affine(Operation):
                         zz, fill_mode[1], cval[1], interp_order[1]) for y_i in y]
 
         return x, y
+
+
+class GaussNoise(image.GaussNoise):
+    """ Apply Gaussian noise to given images
+
+    Args:
+        mean (float): Mean of Gaussian distribution
+        std  (float): Standard deviation of it
+        keep_y (bool): If True, add noise only to input `x`. Defaults to True.
+    """
+    def __init__(self, mean, std, keep_y=True):
+        super().__init__(mean, std, keep_y)
+        self._ndim = 3
+
+class SpeckleNoise(image.SpeckleNoise):
+    """ Apply Speckle noise to given images
+
+    Args:
+        mean (float): Mean of Gaussian distribution
+        std  (float): Standard deviation of it
+        keep_y (bool): If True, add noise only to input `x`. Defaults to True.
+    """
+    def __init__(self, mean, std, keep_y=True):
+        super().__init__(mean, std, keep_y)
+        self._ndim = 3
+
+class SaltNoise(image.SaltNoise):
+    """ Apply Salt noise to given images
+
+    Args:
+        ratio (float): Ratio of the noise
+        cval  (float): If None, this value is set to the maximum value of the input.
+        keep_y (bool): If True, add noise only to input `x`. Defaults to True.
+    """
+    def __init__(self, ratio, cval=None, keep_y=True):
+        super().__init__(ratio, cval, keep_y)
+        self._ndim = 3
+
+class PepperNoise(image.PepperNoise):
+    """ Apply Pepper noise to given images
+
+    Args:
+        ratio (float): Ratio of the noise
+        cval  (float): If None, this value is set to the maximum value of the input.
+        keep_y (bool): If True, add noise only to input `x`. Defaults to True.
+    """
+    def __init__(self, ratio, cval=None, keep_y=True):
+        super().__init__(ratio, cval, keep_y)
+        self._ndim = 3
+
+class PoissonNoise(GaussNoise):
+    """ Apply Poisson noise to given images
+
+    Args:
+        mean (float): Mean of Poisson distribution
+        keep_y (bool): If True, add noise only to input `x`. Defaults to True.
+    """
+    def __init__(self, mean, keep_y=True):
+        super().__init__(mean, keep_y)
+        self._ndim = 3
