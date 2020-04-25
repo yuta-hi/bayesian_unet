@@ -4,6 +4,7 @@ import numpy as np
 import scipy.ndimage as ndi
 import cv2
 from functools import partial
+from functools import wraps
 
 from . import Operation
 
@@ -347,6 +348,7 @@ class Affine(Operation):
 
 
 def clip(func):
+    @wraps(func)
     def warp(x, *args, **kwargs):
         clim = (np.min(x), np.max(x))
         x = func(x, *args, **kwargs)
@@ -355,11 +357,11 @@ def clip(func):
 
 @clip
 def gauss_noise(x, mean, std):
-    return x + np.random.normal(mean, std, x.shape)
+    return x + np.random.normal(mean, std, x.shape).astype(x.dtype)
 
 @clip
 def speckle_noise(x, mean, std):
-    return x + x * np.random.normal(mean, std, x.shape)
+    return x + x * np.random.normal(mean, std, x.shape).astype(x.dtype)
 
 @clip
 def salt_noise(x, ratio, cval=None):
@@ -393,7 +395,7 @@ def poisson_noise(x, mean):
     max_val = np.max(x)
     x /= max_val
 
-    x = np.random.poisson(x * mean) / float(mean)
+    x = np.random.poisson(x * mean).astype(x.dtype) / float(mean)
 
     x *= max_val
     x += min_val
