@@ -2,7 +2,9 @@
 
 This is Chainer implementation for Bayesian Convolutional Neural Networks.
 
-(Keras re-impremitation is also available: [keras_bayesian_unet](https://github.com/yuta-hi/keras_bayesian_unet))
+(Keras and PyTorch re-impremitation are also available: 
+  [keras_bayesian_unet](https://github.com/yuta-hi/keras_bayesian_unet),
+  [pytorch_bayesian_unet](https://github.com/yuta-hi/pytorch_bayesian_unet))
 
 In this project, we assume the following two scenarios, especially for medical imaging.
 1. Two-dimensional segmentation / regression with the 2D U-Net.  (e.g., 2D x-ray, laparoscopic images, and CT slices)
@@ -13,19 +15,27 @@ In this project, we assume the following two scenarios, especially for medical i
 This is a part of following works.
 ```
 @article{hiasa2019automated,
-  title={Automated Muscle Segmentation from Clinical CT using Bayesian U-Net for Personalized Musculoskeletal Modeling},
+  title={Automated muscle segmentation from clinical CT using Bayesian U-net for personalized musculoskeletal Modeling},
   author={Hiasa, Yuta and Otake, Yoshito and Takao, Masaki and Ogawa, Takeshi and Sugano, Nobuhiko and Sato, Yoshinobu},
   journal={IEEE Transactions on Medical Imaging},
-  year={2019 (in press)},
-  doi={10.1109/TMI.2019.2940555},
+  volume={39},
+  number={4},
+  pages={1030--1040},
+  year={2019},
+  publisher={IEEE},
+  doi={10.1109/TMI.2019.2940555}
 }
 
-@article{sakamoto2019bayesian,
-  title={Bayesian Segmentation of Hip and Thigh Muscles in Metal Artifact-Contaminated CT using Convolutional Neural Network-Enhanced Normalized Metal Artifact Reduction},
+@article{sakamoto2020bayesian,
+  title={Bayesian segmentation of hip and thigh muscles in metal artifact-contaminated CT using convolutional neural network-enhanced normalized metal artifact reduction},
   author={Sakamoto, Mitsuki and Hiasa, Yuta and Otake, Yoshito and Takao, Masaki and Suzuki, Yuki and Sugano, Nobuhiko and Sato, Yoshinobu},
   journal={Journal of Signal Processing Systems},
-  year={2019 (in press)}
-  doi={10.1007/s11265-019-01507-z},
+  volume={92},
+  number={3},
+  pages={335--344},
+  year={2020},
+  publisher={Springer},
+  doi={10.1007/s11265-019-01507-z}
 }
 
 @inproceedings{hiasa2018surgical,
@@ -435,6 +445,10 @@ make all
 
 ## Related repositories
 - [keras_bayesian_unet](https://github.com/yuta-hi/keras_bayesian_unet)
+
+- [pytorch_bayesian_unet](https://github.com/yuta-hi/pytorch_bayesian_unet)
+
+- [pytorch_bayesian_unet_inference_cpp](https://github.com/yuta-hi/pytorch_bayesian_unet_inference_cpp)
 
 - [remove_island](https://github.com/yuta-hi/remove-island)
 
