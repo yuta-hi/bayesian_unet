@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from chainer import cuda
+from chainer import backend
 from chainer import functions as F
 from chainer.functions import sigmoid_cross_entropy
 from chainer.functions import softmax_cross_entropy
@@ -32,30 +32,32 @@ def noised_softmax_cross_entropy(y, t, mc_iteration,
     assert log_std.shape[1] in (logits.shape[1], 1)
     assert logits.shape[2:] == log_std.shape[2:]
 
-    xp = cuda.get_array_module(t)
-
-    ret = []
+    xp = backend.get_array_module(t)
 
     # std = F.sqrt(F.exp(log_var))
     std = F.exp(log_std)
 
+    loss = 0.
+
     for _ in range(mc_iteration):
         noise = std * xp.random.normal(0., 1., std.shape)
-        loss = softmax_cross_entropy(logits + noise, t,
-                                     normalize=normalize,
-                                     cache_score=cache_score,
-                                     class_weight=class_weight,
-                                     ignore_label=ignore_label,
-                                     reduce=reduce,
-                                     enable_double_backprop=enable_double_backprop)
-        ret.append(loss[None])
+        loss += softmax_cross_entropy(logits + noise, t,
+                                      normalize=False,
+                                      cache_score=cache_score,
+                                      class_weight=class_weight,
+                                      ignore_label=ignore_label,
+                                      reduce='no',
+                                      enable_double_backprop=enable_double_backprop)
 
-    ret = F.concat(ret, axis=0)
+    if not reduce == 'mean':
+        return loss
 
-    if reduce == 'mean':
-        return F.mean(ret)
+    if normalize:
+        count = loss.size * mc_iteration
+    else:
+        count = max(1, len(loss)) * mc_iteration
 
-    return ret
+    return F.sum(loss) / count
 
 
 def noised_sigmoid_cross_entropy(y, t, mc_iteration, normalize=True, reduce='mean'):
@@ -80,26 +82,28 @@ def noised_sigmoid_cross_entropy(y, t, mc_iteration, normalize=True, reduce='mea
     assert logits.shape[2:] == log_std.shape[2:]
     assert logits.shape == t.shape
 
-    xp = cuda.get_array_module(t)
-
-    ret = []
+    xp = backend.get_array_module(t)
 
     # std = F.sqrt(F.exp(log_var))
     std = F.exp(log_std)
 
+    loss = 0.
+
     for _ in range(mc_iteration):
         noise = std * xp.random.normal(0., 1., std.shape)
-        loss = sigmoid_cross_entropy(logits + noise, t,
-                                     normalize=normalize,
-                                     reduce=reduce)
-        ret.append(loss[None])
+        loss += sigmoid_cross_entropy(logits + noise, t,
+                                      normalize=False,
+                                      reduce='no')
 
-    ret = F.concat(ret, axis=0)
+    if not reduce == 'mean':
+        return loss
 
-    if reduce == 'mean':
-        return F.mean(ret)
+    if normalize:
+        count = loss.size * mc_iteration
+    else:
+        count = max(1, len(loss)) * mc_iteration
 
-    return ret
+    return F.sum(loss) / count
 
 
 def noised_sigmoid_soft_cross_entropy(y, t, mc_iteration, normalize=True, reduce='mean'):
@@ -122,23 +126,25 @@ def noised_sigmoid_soft_cross_entropy(y, t, mc_iteration, normalize=True, reduce
     assert logits.shape == log_std.shape
     assert logits.shape == t.shape
 
-    xp = cuda.get_array_module(t)
-
-    ret = []
+    xp = backend.get_array_module(t)
 
     # std = F.sqrt(F.exp(log_var))
     std = F.exp(log_std)
 
+    loss = 0.
+
     for _ in range(mc_iteration):
         noise = std * xp.random.normal(0., 1., std.shape)
-        loss = sigmoid_soft_cross_entropy(logits + noise, t,
-                                          normalize=normalize,
-                                          reduce=reduce)
-        ret.append(loss[None])
+        loss += sigmoid_soft_cross_entropy(logits + noise, t,
+                                           normalize=False,
+                                           reduce='no')
 
-    ret = F.concat(ret, axis=0)
+    if not reduce == 'mean':
+        return loss
 
-    if reduce == 'mean':
-        return F.mean(ret)
+    if normalize:
+        count = loss.size * mc_iteration
+    else:
+        count = max(1, len(loss)) * mc_iteration
 
-    return ret
+    return F.sum(loss) / count
