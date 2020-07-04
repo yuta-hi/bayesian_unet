@@ -2,7 +2,7 @@
 
 This is Chainer implementation for Bayesian Convolutional Neural Networks.
 
-(Keras and PyTorch re-impremitation are also available: 
+(Keras and PyTorch re-impremitation are also available:
   [keras_bayesian_unet](https://github.com/yuta-hi/keras_bayesian_unet),
   [pytorch_bayesian_unet](https://github.com/yuta-hi/pytorch_bayesian_unet))
 
