@@ -30,6 +30,11 @@ class ReplayBuffer(object):
             return None
         return self._buffer
 
+    def _preprocess(self, x):
+        if isinstance(x, Variable):
+            x = x.array
+        return x
+
     def _postprocess(self, x):
         if not self.return_variable:
             return x
@@ -37,44 +42,25 @@ class ReplayBuffer(object):
 
     def __call__(self, samples):
 
-        if isinstance(samples, Variable):
-            samples = samples.array
+        samples = self._preprocess(samples)
 
         xp = backend.get_array_module(samples)
 
         n_samples = len(samples)
 
-        if len(self._buffer) == 0:
-            return self._postprocess(samples)
-
-        if len(self._buffer) < self.size:
+        if self.size == 0:
+            pass
+        elif len(self._buffer) == 0:
+            self._buffer = samples
+        elif len(self._buffer) < self.size:
             self._buffer = xp.vstack((self._buffer, samples))
-            return self._postprocess(samples)
+        else:
+            # evoke the memory
+            random_bool = np.random.rand(n_samples) < self.p
+            replay_indices = np.random.randint(0, len(self._buffer), size=n_samples)[random_bool]
+            sample_indices = np.random.randint(0, n_samples, size=n_samples)[random_bool]
 
-        # evoke the memory
-        random_bool = np.random.rand(n_samples) < self.p
-        replay_indices = np.random.randint(0, len(self._buffer), size=n_samples)[random_bool]
-        sample_indices = np.random.randint(0, n_samples, size=n_samples)[random_bool]
-
-        self._buffer[replay_indices], samples[sample_indices] \
-            = samples[sample_indices], self._buffer[replay_indices] # swap
+            self._buffer[replay_indices], samples[sample_indices] \
+                = samples[sample_indices], self._buffer[replay_indices] # swap
 
         return self._postprocess(samples)
-
-
-if __name__ == '__main__':
-
-    import cupy
-    from chainer import Variable
-
-    buffer = ReplayBuffer(10)
-    print(buffer.buffer)
-
-    for i in range(20):
-        a = buffer(Variable(cupy.zeros((2,3,4,5)) + i))
-        print(i, a)
-    print(a.shape)
-    print(a.__class__)
-
-    print(buffer.buffer)
-    print(len(buffer.buffer))
